@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "example.fullname" . }}
+  labels:
+    {{- include "example.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "example.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "example.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      restartPolicy: {{ .Values.jobs.restartPolicy }}
+    {{- if .Values.initContainers.container1.enabled }}
+      initContainers:
+        - name: init-container1
+          image: busybox:1.33
+          command: ['sh', '-c', "echo 'Waiting for service 1 to init...'; until wget {{ .Values.initContainers.container1.host }}:{{ .Values.initContainers.container1.port }} 2>&1 >/dev/null | grep -q 'Connection reset by peer'; do echo 'Not yet running...'; sleep 2; done; echo 'Confirmed setting up'; sleep 20; until wget {{ .Values.initContainers.container1.host }}:{{ .Values.initContainers.container1.port }} 2>&1 >/dev/null | grep -q 'Connection reset by peer'; do echo 'Not yet running'; sleep 2; done; echo 'Confirmed running'"]
+    {{- end }}
+    {{- if .Values.initContainers.container2.enabled }}
+        - name: init-container2
+          image: busybox:1.33
+          command: ['sh', '-c', "echo 'Waiting for service2 to init...'; until wget {{ .Values.initContainers.container2.host }}:{{ .Values.initContainers.container2.port }} 2>&1 >/dev/null | grep -q 'Connection reset by peer'; do echo 'Not yet running...'; sleep 2; done; echo 'Confirmed running'"]
+    {{- end }}
+
+      containers:
+        - name: api
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image }}"
+          imagePullPolicy: Always
+          command: ["java"]
+          ports:
+            - name: api
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          env:
+            - name: SCONE_CONFIG_ID
+              value: {{ .Values.scone.api_session }}
+            - name: SCONE_CAS_ADDR
+              value: {{ .Values.scone.cas }}
+            - name: SCONE_LAS_ADDR
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.hostIP
+            - name: SCONE_LOG
+              value: {{ .Values.scone.scone_log | quote }}
+            - name: SCONE_VERSION
+              value: {{ .Values.scone.scone_version | quote }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

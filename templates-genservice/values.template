@@ -1,0 +1,78 @@
+{% raw %}
+# RAW SECTION: THIS WILL BE RENDERED BY SCONE MESH
+
+replicaCount: 1
+
+image: {{image_name}}
+
+
+imagePullSecrets:
+  - name: {{imagePullSecrets}}
+
+
+nameOverride: ""
+fullnameOverride: ""
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+ingress:
+  enabled: false
+  annotations: {}
+  hosts:
+    - host: chart-example.local
+      paths: []
+  tls: []
+
+resources:
+  limits:
+    "sgx.k8s.io/sgx": 1
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+
+scone:
+  api_session: {{session}}/java
+  cas: {{cas.cas.cas_url}}
+{% endraw %}
+
+# TEMPLATE SECTION: THIS WILL BE RENDERED BY SCONE GENSERVICE
+#  - we give values in service.yaml priority
+#  - otherwise we use values 
+#      - using from scone mesh: see APP_SERVICE_PORT below
+#      - using a constant:  default(value="error")
+
+  scone_log: {{SCONE_LOG | default(value="error")}}
+  scone_version: {{SCONE_VERSION | default(value="0")}}
+
+initContainers:
+  container1:
+    enabled: {{INIT_CONTAINER1_ENABLE  | default(value="false") }}
+    host: {{INIT_CONTAINER1  | default(value="") }}
+    port: {{INIT_CONTAINER1_PORT | default(value="")}}
+  container2:
+    enabled: {{INIT_CONTAINER2_ENABLE  | default(value="false") }}
+    host: {{INIT_CONTAINER2 | default(value="") }}
+    port: {{INIT_CONTAINER2_PORT | default(value="")}}
+
+
+# on which port the API is listening
+
+service:
+  type: ClusterIP
+  port: {{PYTHON_SERVICE_PORT | default(value="{{APP_SERVICE_PORT}}")}}
+
+jobs:
+  restartPolicy: {{restartPolicy | default(value="Always")}}
