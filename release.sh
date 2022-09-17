@@ -1,1 +1,2 @@
-export RELEASE="javaapp"
+export RELEASE="javarelease"
+

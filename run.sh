@@ -11,14 +11,15 @@ export NC='\e[0m' # No Color
 source release.sh || true # get release name
 
 if [ -z "$APP_NAMESPACE" ] ; then
-    export APP_NAMESPACE="javaapp-$RANDOM-$RANDOM"
-    echo -e "export APP_NAMESPACE=javaapp-$RANDOM-$RANDOM\n" >> release.sh  
+    export APP_NAMESPACE="$RELEASE-$RANDOM-$RANDOM"
+    echo -e "export APP_NAMESPACE=$RELEASE-$RANDOM-$RANDOM\n" >> release.sh  
 else 
     echo "CAS Namespace already defined: $APP_NAMESPACE"
 fi
 
 DEFAULT_NAMESPACE="" # Default Kubernetes namespace to use
-APP_IMAGE_REPO=${APP_IMAGE_REPO:=""} # Must be defined!
+export APP_IMAGE_REPO=${APP_IMAGE_REPO:=""} # Must be defined!
+export SCONECTL_REPO=${SCONECTL_REPO:="registry.scontain.com:5050/sconectl"}
 
 # print an error message on an error exit
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
@@ -34,6 +35,9 @@ verbose=""
 release_flag="--release"
 release_short_flag="-r"
 verbose=""
+debug_flag="--debug"
+debug_short_flag="-d"
+debug=""
 
 ns="$DEFAULT_NAMESPACE"
 repo="$APP_IMAGE_REPO"
@@ -52,7 +56,7 @@ usage ()
   echo "    run.sh [$ns_flag <kubernetes-namespace>] [$repo_flag <image repo>] [$release_flag <release name>] [$verbose_flag] [$help_flag]"
   echo ""
   echo ""
-  echo "Builds the application described in service.yaml and mesh.yaml and deploys"
+  echo "Builds the application described in service.yaml.template and mesh.yaml.template and deploys"
   echo "it into your kubernetes cluster."
   echo ""
   echo "Options:"
@@ -68,8 +72,13 @@ usage ()
   echo "                    export APP_IMAGE_REPO=\"$APP_IMAGE_REPO\""
   echo "    $verbose_flag"
   echo "                  Enable verbose output"
+  echo "    $debug_flag | debug_short_flag"
+  echo "                  Create debug image instead of a production image"
   echo "    $help_flag"
   echo "                  Output this usage information and exit."
+  echo ""
+  echo "By default this uses the latest release of the SCONE Elements images. To use image from a different"
+  echo "repository (e.g., a local cache), set SCONECTL_REPO to the repo you want to use instead."
   return
 }
 
@@ -108,6 +117,10 @@ while [[ "$#" -gt 0 ]]; do
       verbose="-vvvvvvvv"
       shift # past argument
       ;;
+    ${debug_flag} | ${debug_short_flag})
+      debug="--mode=debug"
+      shift # past argument
+      ;;
     $help_flag)
       usage
       exit 0
@@ -129,16 +142,19 @@ if [  "${repo}" == "" ]; then
     usage
     error_exit  "Error: You must specify a repo."
 fi
+export APP_IMAGE_REPO="${repo}"
+export RELEASE="$release"
 
 # Check to make sure all prerequisites are installed
 ./check_prerequisites.sh
 
 echo -e "${BLUE}Checking that we have access to the base container image${NC}"
 
-docker inspect registry.scontain.com:5050/cicd/sconecli:latest > /dev/null 2> /dev/null || docker pull registry.scontain.com:5050/cicd/sconecli:latest > /dev/null 2> /dev/null || { 
+docker inspect registry.scontain.com:5050/sconectl/sconecli:latest > /dev/null 2> /dev/null || docker pull registry.scontain.com:5050/sconectl/sconecli:latest > /dev/null 2> /dev/null || { 
     echo -e "${RED}You must get access to image `sconectl/sconecli:latest`.${NC}" 
     error_exit "Please send email info@scontain.com to ask for access"
 }
+
 
 echo -e "${BLUE}let's ensure that we build everything from scratch${NC}" 
 rm -rf target || echo -e "${ORANGE} Failed to delete target directory - ignoring this! ${NC}"
@@ -150,7 +166,7 @@ echo -e  "${BLUE}   change in file '${ORANGE}service.yaml${BLUE}' field '${ORANG
 
 SCONE="\$SCONE" envsubst < service.yaml.template > service.yaml
 
-sconectl apply -f service.yaml -h templates-genservice $verbose
+sconectl apply -f service.yaml -h templates-genservice $verbose $debug
 
 
 echo -e "${BLUE}build application and pushing policies:${NC} apply -f mesh.yaml"
@@ -159,7 +175,7 @@ echo -e "  - update the namespace '${ORANGE}policy.namespace${NC}' to a unique n
 
 SCONE="\$SCONE" envsubst < mesh.yaml.template > mesh.yaml
 
-sconectl apply -f mesh.yaml $verbose
+sconectl apply -f mesh.yaml --release "$RELEASE" $verbose $debug
 
 echo -e "${BLUE}Uninstalling application in case it was previously installed:${NC} helm uninstall ${namespace_args} ${RELEASE}"
 echo -e "${BLUE} - this requires that 'kubectl' gives access to a Kubernetes cluster${NC}"
