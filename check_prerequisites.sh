@@ -59,7 +59,7 @@ fi
 echo -e "${BLUE}Checking that we can run container images for linux/amd64${NC}"
 if ! docker run --platform linux/amd64 -it --rm hello-world &> /dev/null
 then
-    echo -e "${RED}Docker does not seem to support argument '--plaform linux/amd64'"
+    echo -e "${RED}Docker does not seem to support argument '--platform linux/amd64'"
     echo -e "Please ensure that you can run the latest version of docker (i.e.,  API version >= 1.40)" 
     VERSIONS=$(docker version | grep "API version" | awk '{ print $3}')
     for i in $VERSIONS ; do
@@ -72,8 +72,19 @@ then
     error_exit
 fi
 
+echo -e "${BLUE}Checking that you can pull the images ${NC}"
+if docker pull --platform linux/amd64 -it registry.scontain.com/sconectl/check_cpufeatures:latest &> /dev/null
+then
+    echo -e "${RED}Docker does NOT seem to be able to pull the required container images.${NC}"
+    echo -e "- ${ORANGE}1. Register an account with your company email at https://gitlab.scontain.com/users/sign_up.${NC}"
+    echo -e "- ${ORANGE}2. Create an access token https://sconedocs.github.io/registry/#create-an-access-token${NC}"
+    echo -e "- ${ORANGE}3. Log into your docker engine https://sconedocs.github.io/registry/#docker-login${NC}"
+    echo -e "\n${RED}NOTE: ${ORANGE}If you registered with an anonymous email address or before fall 2022, we might not have\n      granted you access to all required images by default. Send us an email: info@scontain.com${NC}"
+    error_exit
+fi
+
 echo -e "${BLUE}Checking that we the CPU has all necessary CPU features enabled${NC}"
-if ! docker run --platform linux/amd64 -it --rm registry.scontain.com:5050/cicd/check_cpufeatures:latest &> /dev/null
+if ! docker run --platform linux/amd64 -it --rm registry.scontain.com/sconectl/check_cpufeatures:latest &> /dev/null
 then
     echo -e "${RED}Docker does not seem to support all CPU features.${NC}"
     echo -e "- ${ORANGE}Assuming you do not run on a modern Intel CPU. Please ensure that you pass the following options to qemu: -cpu qemu64,+ssse3,+sse3,+sse4.1,+sse4.2,+rdrand,+popcnt,+xsave,+aes${NC}" 
@@ -115,3 +126,21 @@ echo -e "${BLUE}Making sure that $HOME/.scone can be written by all. ${NC}"
 echo -e "   ${BLUE}This is needed since we might have a different user ID inside of a container${NC}"
 chmod 0777 "$HOME/.scone" ||  ( echo -e "${RED}Failed to create $HOME/.scone$.\n Maybe, run 'sudo chmod 0777 $HOME/.scone'{NC}" ; error_exit)
 
+
+echo -e "${BLUE}Checking that you have access to a Kubernetes cluster. ${NC}"
+if ! kubectl get pods &> /dev/null
+then
+    echo -e "${RED}It seems that you do not have access to a Kubernetes cluster!${NC}"
+    echo -e "- ${ORANGE}Please ensure that you have access to a Kubernetes cluster${NC}"
+fi
+
+
+echo -e "${BLUE}Checking that you have the local attestation service, the SGX Plugin, and the image pull secrets installed${NC}"
+#if ! sconectl scone_init &> /dev/null
+if ! ((kubectl get las | grep HEALTHY) && (kubectl get cas | grep HEALTHY) && (kubectl get sgxplugin | grep HEALTHY))
+then
+    echo -e "${RED}It seems the Kubernetes cluster is not yet properly initialized!${NC}"
+    echo -e "- ${ORANGE}1. Retrieve/create an access token https://sconedocs.github.io/registry/#create-an-access-token${NC}"
+    echo -e "- ${ORANGE}2. Install the SCONE operator: https://sconedocs.github.io/2_operator_installation/"
+    echo -e "- ${ORANGE}3. Install SGXPlugin, LAS, and CAS: https://sconedocs.github.io/4_quickstart/${NC}"
+fi

@@ -19,7 +19,7 @@ fi
 
 DEFAULT_NAMESPACE="" # Default Kubernetes namespace to use
 export APP_IMAGE_REPO=${APP_IMAGE_REPO:=""} # Must be defined!
-export SCONECTL_REPO=${SCONECTL_REPO:="registry.scontain.com:5050/sconectl"}
+export SCONECTL_REPO=${SCONECTL_REPO:="registry.scontain.com/sconectl"}
 
 # print an error message on an error exit
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
@@ -150,7 +150,7 @@ export RELEASE="$release"
 
 echo -e "${BLUE}Checking that we have access to the base container image${NC}"
 
-docker inspect registry.scontain.com:5050/sconectl/sconecli:latest > /dev/null 2> /dev/null || docker pull registry.scontain.com:5050/sconectl/sconecli:latest > /dev/null 2> /dev/null || { 
+docker inspect registry.scontain.com/sconectl/sconecli:latest > /dev/null 2> /dev/null || docker pull registry.scontain.com/sconectl/sconecli:latest > /dev/null 2> /dev/null || { 
     echo -e "${RED}You must get access to image `sconectl/sconecli:latest`.${NC}" 
     error_exit "Please send email info@scontain.com to ask for access"
 }
