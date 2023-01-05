@@ -1,6 +1,8 @@
 # Java Confidential Hello World!
 
-In this tutorial, we reproduce the same steps performed in the [Scone Mesh Tutorial](https://sconedocs.github.io/scone_mesh_tutorial/) to show how to provide a simple cloud-native Java application with a secret such that **nobody** (except for the program itself) can access the secret. 
+In this tutorial, we reproduce the same steps performed in the [Scone Mesh Tutorial](https://sconedocs.github.io/scone_mesh_tutorial/) to show how to provide a simple cloud-native Java application with a secret such that **nobody** (except for the program itself) can access the secret.
+
+The code of this tutorial can be found [on github](https://github.com/scontain/java_sconectl_tutorial/).
 
 ## Java Support
 
@@ -23,7 +25,7 @@ The classpath, if not provided in `build.command` (`java -cp <classpath> ...` or
 
 Suppose you have been working on a project containing the following structure:
 
-```
+```text
 javaapp
 │   service.yaml
 └───lib
@@ -38,7 +40,7 @@ javaapp
 ```
 The structure above can be declared as follows.
 
-```
+```text
 build:
    name: java-new-app
    kind: java
