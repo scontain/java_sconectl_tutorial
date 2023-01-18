@@ -33,7 +33,3 @@ env:
 services:
   - name: javaapp
     image: $APP_IMAGE_REPO/java_hello_user:1
-    helm_extra_values:
-      resources:
-        limits:
-          "sgx.k8s.io/sgx": 2
