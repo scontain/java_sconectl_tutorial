@@ -161,8 +161,8 @@ fi
 
 echo -e "${BLUE}Checking that we have access to the base container image${NC}"
 
-docker inspect registry.scontain.com/sconectl/sconecli:${VERSION} > /dev/null 2> /dev/null || docker pull registry.scontain.com/sconectl/sconecli:${VERSION} > /dev/null 2> /dev/null || { 
-    echo -e "${RED}You must get access to image `sconectl/sconecli:${VERSION}`.${NC}" 
+docker inspect ${SCONECTL_REPO}/sconecli:${VERSION} > /dev/null 2> /dev/null || docker pull ${SCONECTL_REPO}/sconecli:${VERSION} > /dev/null 2> /dev/null || { 
+    echo -e "${RED}You must get access to image `${SCONECTL_REPO}/sconecli:${VERSION}`.${NC}" 
     error_exit "Please send email info@scontain.com to ask for access"
 }
 
