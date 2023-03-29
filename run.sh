@@ -12,9 +12,11 @@ export NC='\e[0m' # No Color
 APP_NAMESPACE=""
 source release.sh || true # get release name
 
-DEFAULT_NAMESPACE="" # Default Kubernetes namespace to use
+DEFAULT_NAMESPACE="default" # Default Kubernetes namespace to use
 export APP_IMAGE_REPO=${APP_IMAGE_REPO:=""} # Must be defined!
 export SCONECTL_REPO=${SCONECTL_REPO:="registry.scontain.com/sconectl"}
+export CAS=${CAS:="cas"}
+export CAS_NAMESPACE=${CAS_NAMESPACE:="default"}
 
 # print an error message on an error exit
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
@@ -33,6 +35,8 @@ verbose=""
 debug_flag="--debug"
 debug_short_flag="-d"
 debug=""
+cas_flag="--cas"
+cas_namespace_flag="--cas-namespace"
 
 ns="$DEFAULT_NAMESPACE"
 repo="$APP_IMAGE_REPO"
@@ -69,6 +73,10 @@ usage ()
   echo "                  Enable verbose output"
   echo "    $debug_flag | debug_short_flag"
   echo "                  Create debug image instead of a production image"
+  echo "    $cas_flag"
+  echo "                  Set the name of the CAS service that we should use. Default is $CAS"
+  echo "    $cas_namespace_flag"
+  echo "                  Set the namespace of the CAS service that we should use. Default is $CAS_NAMESPACE"
   echo "    $help_flag"
   echo "                  Output this usage information and exit."
   echo ""
@@ -120,6 +128,24 @@ while [[ "$#" -gt 0 ]]; do
       debug="--mode=debug"
       shift # past argument
       ;;
+    ${cas_flag})
+      export CAS="$2"
+      if [ ! -n "${CAS}" ]; then
+        usage
+        error_exit "Error: The cas name '$CAS' is invalid."
+      fi
+      shift # past argument
+      shift || true # past value
+      ;;
+    ${cas_namespace_flag})
+      export CAS_NAMESPACE="$2"
+      if [ ! -n "${CAS_NAMESPACE}" ]; then
+        usage
+        error_exit "Error: The cas namespace '$CAS_NAMESPACE' is invalid."
+      fi
+      shift # past argument
+      shift || true # past value
+      ;;
     $help_flag)
       usage
       exit 0
@@ -148,7 +174,7 @@ if [ -z "$APP_NAMESPACE" ] ; then
     export APP_NAMESPACE="$RELEASE-$RANDOM-$RANDOM"
     echo -e "export APP_NAMESPACE=$RELEASE-$RANDOM-$RANDOM\n" >> release.sh  
 else 
-    echo "CAS Namespace already defined: $APP_NAMESPACE"
+    echo "App namespace is already defined: $APP_NAMESPACE"
 fi
 
 if [  "${RELEASE}" == "" ]; then
@@ -177,16 +203,17 @@ echo -e  "${BLUE}   change in file '${ORANGE}service.yaml${BLUE}' field '${ORANG
 
 SCONE="\$SCONE" envsubst < service.yaml.template > service.yaml
 
-sconectl apply -f service.yaml -h templates-genservice $verbose $debug
+sconectl apply -f service.yaml -h templates-genservice $verbose $debug --set-version ${VERSION}
 
 
 echo -e "${BLUE}build application and pushing policies:${NC} apply -f mesh.yaml"
 echo -e "${BLUE}  - this fails, if you do not have access to the SCONE CAS namespace"
 echo -e "  - update the namespace '${ORANGE}policy.namespace${NC}' to a unique name in '${ORANGE}mesh.yaml${NC}'"
 
+export CAS_URL="${CAS}.${CAS_NAMESPACE}"
 SCONE="\$SCONE" envsubst < mesh.yaml.template > mesh.yaml
 
-sconectl apply -f mesh.yaml --release "$RELEASE" $verbose $debug
+sconectl apply -f mesh.yaml --release "$RELEASE" $verbose $debug --set-version ${VERSION}
 
 echo -e "${BLUE}Uninstalling application in case it was previously installed:${NC} helm uninstall ${namespace_args} ${RELEASE}"
 echo -e "${BLUE} - this requires that 'kubectl' gives access to a Kubernetes cluster${NC}"
