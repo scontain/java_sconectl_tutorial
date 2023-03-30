@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
+export VERSION=${VERSION:-latest}
 
 
 export RED='\e[31m'
@@ -11,9 +12,11 @@ export NC='\e[0m' # No Color
 APP_NAMESPACE=""
 source release.sh || true # get release name
 
-DEFAULT_NAMESPACE="" # Default Kubernetes namespace to use
+DEFAULT_NAMESPACE="default" # Default Kubernetes namespace to use
 export APP_IMAGE_REPO=${APP_IMAGE_REPO:=""} # Must be defined!
 export SCONECTL_REPO=${SCONECTL_REPO:="registry.scontain.com/sconectl"}
+export CAS=${CAS:="cas"}
+export CAS_NAMESPACE=${CAS_NAMESPACE:="default"}
 
 # print an error message on an error exit
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
@@ -38,8 +41,6 @@ cas_namespace_flag="--cas-namespace"
 ns="$DEFAULT_NAMESPACE"
 repo="$APP_IMAGE_REPO"
 release="$RELEASE"
-export CAS="cas"
-export CAS_NAMESPACE="default"
 
 error_exit() {
   trap '' EXIT
@@ -79,8 +80,12 @@ usage ()
   echo "    $help_flag"
   echo "                  Output this usage information and exit."
   echo ""
-  echo "By default this uses the latest release of the SCONE Elements images. To use image from a different"
-  echo "repository (e.g., a local cache), set SCONECTL_REPO (=\"$SCONECTL_REPO\") to the repo you want to use instead."
+  echo "By default this uses the latest release of the SCONE Elements images: By setting environment variable"
+  echo "   export VERSION=\"<VERSION>\""
+  echo "you can select a different version. Currently selected version is $VERSION."
+  echo "To use image from a different repository (e.g., a local cache), set "
+  echo "   export SCONECTL_REPO (=\"$SCONECTL_REPO\")"
+  echo "to the repo you want to use instead. Currently selected repo is $SCONECTL_REPO."
   return
 }
 
@@ -159,20 +164,17 @@ else
 fi
 
 if [  "${repo}" == "" ]; then
-    if [ "$APP_IMAGE_REPO" == "" ]; then
-       usage
-       error_exit  "Error: You must specify a repo."
-    fi
-else
-    export APP_IMAGE_REPO="${APP_IMAGE_REPO:-$repo}"
+    usage
+    error_exit  "Error: You must specify a repo."
 fi
+export APP_IMAGE_REPO="${repo}"
 export RELEASE="$release"
 
 if [ -z "$APP_NAMESPACE" ] ; then
     export APP_NAMESPACE="$RELEASE-$RANDOM-$RANDOM"
     echo -e "export APP_NAMESPACE=$RELEASE-$RANDOM-$RANDOM\n" >> release.sh  
 else 
-    echo "CAS Namespace already defined: $APP_NAMESPACE"
+    echo "App namespace is already defined: $APP_NAMESPACE"
 fi
 
 if [  "${RELEASE}" == "" ]; then
@@ -181,17 +183,12 @@ if [  "${RELEASE}" == "" ]; then
 fi
 
 # Check to make sure all prerequisites are installed
-a=0
-while ! ./check_prerequisites.sh; do
-    sleep 10;
-    a=$[a+1];
-    test $a -eq 10 && exit 1 || true;
-done
+./check_prerequisites.sh
 
 echo -e "${BLUE}Checking that we have access to the base container image${NC}"
 
-docker inspect registry.scontain.com/sconectl/sconecli:latest > /dev/null 2> /dev/null || docker pull registry.scontain.com/sconectl/sconecli:latest > /dev/null 2> /dev/null || { 
-    echo -e "${RED}You must get access to image `sconectl/sconecli:latest`.${NC}" 
+docker inspect ${SCONECTL_REPO}/sconecli:${VERSION} > /dev/null 2> /dev/null || docker pull ${SCONECTL_REPO}/sconecli:${VERSION} > /dev/null 2> /dev/null || { 
+    echo -e "${RED}You must get access to image `${SCONECTL_REPO}/sconecli:${VERSION}`.${NC}" 
     error_exit "Please send email info@scontain.com to ask for access"
 }
 
@@ -206,20 +203,20 @@ echo -e  "${BLUE}   change in file '${ORANGE}service.yaml${BLUE}' field '${ORANG
 
 SCONE="\$SCONE" envsubst < service.yaml.template > service.yaml
 
-sconectl apply -f service.yaml --helm-template templates-genservice $verbose $debug
+sconectl apply -f service.yaml --helm-template templates-genservice $verbose $debug --set-version ${VERSION}
 
 echo -e "${BLUE}Determine the keys of CAS instance '$CAS' in namespace '$CAS_NAMESPACE'"
 
 source <(kubectl provision cas "$CAS" -n "$CAS_NAMESPACE" --print-public-keys || exit 1)
 
-
 echo -e "${BLUE}build application and pushing policies:${NC} apply -f mesh.yaml"
 echo -e "${BLUE}  - this fails, if you do not have access to the SCONE CAS namespace"
 echo -e "  - update the namespace '${ORANGE}policy.namespace${NC}' to a unique name in '${ORANGE}mesh.yaml${NC}'"
 
+export CAS_URL="${CAS}.${CAS_NAMESPACE}"
 SCONE="\$SCONE" envsubst < mesh.yaml.template > mesh.yaml
 
-sconectl apply -f mesh.yaml --release "$RELEASE" $verbose $debug
+sconectl apply -f mesh.yaml --release "$RELEASE" $verbose $debug --set-version ${VERSION}
 
 echo -e "${BLUE}Uninstalling application in case it was previously installed:${NC} helm uninstall ${namespace_args} ${RELEASE}"
 echo -e "${BLUE} - this requires that 'kubectl' gives access to a Kubernetes cluster${NC}"
