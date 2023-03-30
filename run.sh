@@ -203,8 +203,11 @@ echo -e  "${BLUE}   change in file '${ORANGE}service.yaml${BLUE}' field '${ORANG
 
 SCONE="\$SCONE" envsubst < service.yaml.template > service.yaml
 
-sconectl apply -f service.yaml -h templates-genservice $verbose $debug --set-version ${VERSION}
+sconectl apply -f service.yaml --helm-template templates-genservice $verbose $debug --set-version ${VERSION}
 
+echo -e "${BLUE}Determine the keys of CAS instance '$CAS' in namespace '$CAS_NAMESPACE'"
+
+source <(kubectl provision cas "$CAS" -n "$CAS_NAMESPACE" --print-public-keys || exit 1)
 
 echo -e "${BLUE}build application and pushing policies:${NC} apply -f mesh.yaml"
 echo -e "${BLUE}  - this fails, if you do not have access to the SCONE CAS namespace"
