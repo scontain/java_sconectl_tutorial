@@ -57,6 +57,8 @@ spec:
               value: {{ .Values.scone.scone_log | quote }}
             - name: SCONE_VERSION
               value: {{ .Values.scone.scone_version | quote }}
+            - name: SCONE_EDMM_MODE
+              value: auto
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
