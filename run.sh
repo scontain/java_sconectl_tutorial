@@ -10,7 +10,7 @@ export ORANGE='\e[33m'
 export NC='\e[0m' # No Color
 
 APP_NAMESPACE=""
-source release.sh || true # get release name
+source release.sh 2> /dev/null || true # get release name
 
 DEFAULT_NAMESPACE="default" # Default Kubernetes namespace to use
 export APP_IMAGE_REPO=${APP_IMAGE_REPO:=""} # Must be defined!
@@ -229,3 +229,5 @@ helm install $namespace_arg ${release} target/helm/
 
 echo -e "${BLUE}Check the logs by executing:${NC} kubectl logs ${namespace_args} ${RELEASE}<TAB>"
 echo -e "${BLUE}Uninstall by executing:${NC} helm uninstall ${namespace_args} ${RELEASE}"
+
+APP_NAME="javaapp" ./check_pods.sh
