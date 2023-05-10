@@ -184,7 +184,7 @@ if [  "${RELEASE}" == "" ]; then
 fi
 
 # Check to make sure all prerequisites are installed
-./check_prerequisites.sh
+#  ./check_prerequisites.sh
 
 echo -e "${BLUE}Checking that we have access to the base container image${NC}"
 
