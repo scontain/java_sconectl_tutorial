@@ -28,7 +28,7 @@ secrets:
 
 build:
   name: java-hello-user
-  kind: java
+  kind: java17-bullseye
   to: $APP_IMAGE_REPO/java_hello_user:1
   pwd: /java
   command: java PrintEnv
