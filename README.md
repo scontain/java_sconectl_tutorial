@@ -1,5 +1,24 @@
 # Java Confidential Hello World!
 
+## TL'DR
+
+```bash
+# In case you want to test a release candidate of `sconectl`, you can change the repo and the VERSION
+export SCONECTL_REPO=registry.scontain.com/cicd
+export VERSION=5.8.0-rc.25
+# if you want to use the latest stable release, ensure that these variables are not set:
+unset SCONECTL_REPO
+unset VERSION
+# cleanup the last state
+rm -rf release.sh target
+# define REPO to which you are # define REPO to which you are permitted to push container images
+REPO="<YOUR-REPO>"
+# execute all steps of this tutorial
+./run.sh -i "$REPO" --release secure-doc-management -v
+```
+
+## Motivation
+
 In this tutorial, we reproduce the same steps performed in the [Scone Mesh Tutorial](https://sconedocs.github.io/scone_mesh_tutorial/) to show how to provide a simple cloud-native Java application with a secret such that **nobody** (except for the program itself) can access the secret.
 
 The code of this tutorial can be found [on github](https://github.com/scontain/java_sconectl_tutorial/).
