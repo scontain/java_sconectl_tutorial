@@ -8,7 +8,7 @@ kind: genservice
 environment:
   local:
     - name: SCONE_HEAP
-      value: 2G
+      value: 4G
     - name: SCONE_LOG
       value: error
     - name: SCONE_ALLOW_DLOPEN
@@ -28,7 +28,7 @@ secrets:
 
 build:
   name: java-hello-user
-  kind: java17-bullseye
+  kind: java17  # java17-bullseye
   to: $APP_IMAGE_REPO/java_hello_user:1
   pwd: /java
   command: java PrintEnv
