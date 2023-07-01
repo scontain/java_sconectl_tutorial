@@ -7,6 +7,8 @@ kind: genservice
 
 environment:
   local:
+    - name: SCONE_MIN_HEAP
+      value: 100M
     - name: SCONE_HEAP
       value: 4G
     - name: SCONE_LOG
