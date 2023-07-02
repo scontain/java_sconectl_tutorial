@@ -26,8 +26,10 @@ secrets:
   - name: password
     kind: ascii
     size: 10
-
-
+  - name: TRUSTSTORE_P12_HEX # example - we could add a trust store as binary value...
+    kind: binary
+    value: |
+      feedfeed00
 build:
   name: java-hello-user
   kind: java17  # java17-bullseye
