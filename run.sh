@@ -17,7 +17,7 @@ DEFAULT_NAMESPACE="default" # Default Kubernetes namespace to use
 export APP_IMAGE_REPO=${APP_IMAGE_REPO:=""} # Must be defined!
 export SCONECTL_REPO=${SCONECTL_REPO:="registry.scontain.com/sconectl"}
 export CAS=${CAS:="cas"}
-export CAS_NAMESPACE=${CAS_NAMESPACE:="default"}
+export CAS_NAMESPACE=${CAS_NAMESPACE:="scone-system"}
 
 # print an error message on an error exit
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG

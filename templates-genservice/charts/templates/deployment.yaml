@@ -39,7 +39,7 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image }}"
           imagePullPolicy: Always
-          command: ["java"]
+          command: {{ .Values.scone.command }}
           ports:
             - name: api
               containerPort: {{ .Values.service.port }}

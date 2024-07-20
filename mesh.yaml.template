@@ -7,8 +7,9 @@ cas:
     cas_url: $CAS_URL # cas.default  # exported as {{cas_cas_cas_url}}
     cas_key: $CAS_KEY
     tolerance: "-G" # TCB out of date
-    mode: EncryptedManifest
-    cas_encryption_key: $CAS_SESSION_ENCRYPTION_KEY
+    mode: SignedManifest
+#    mode: EncryptedManifest
+#    cas_encryption_key: $CAS_SESSION_ENCRYPTION_KEY
 
 policy:
   namespace: $APP_NAMESPACE    # namespace on CAS instance `cas`

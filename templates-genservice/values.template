@@ -36,7 +36,8 @@ resources:
   limits:
     "sgx.k8s.io/sgx": 1
 
-nodeSelector: {}
+nodeSelector:
+  las.scontain.com/ok: true
 
 tolerations: []
 

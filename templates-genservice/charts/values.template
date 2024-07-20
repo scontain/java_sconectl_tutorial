@@ -51,7 +51,8 @@ resources:
   limits:
     "sgx.k8s.io/sgx": 1
 
-nodeSelector: {}
+nodeSelector:
+  las.scontain.com/ok: true
 
 tolerations: []
 
@@ -59,8 +60,9 @@ affinity: {}
 
 
 scone:
-  api_session: {{session}}/java
+  api_session: {{session}}/{{command}}
   cas: {{cas.cas.cas_url}}
+  command: ["{{command}}"]
 
   scone_log: debug
   scone_version: 1
