@@ -14,13 +14,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class PrintEnv{
     
     @GetMapping
-    public void printEnv() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+    public String helloGradle() {
+        return "Hello Gradle!";
+    }
+
+    @GetMapping("/printenv")
+    public String printEnv() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
         String user = System.getenv("API_USER");
         String pw = System.getenv("API_PASSWORD");
 
         if (user == null || pw == null){
-            System.out.println("Not all required environment variables are defined");
-            System.exit(1);
+            return "Not all required environment variables are defined";
         }
 
         System.out.println("Hello, " + user + " - thanks for passing along the API_PASSWORD");
@@ -49,8 +53,7 @@ public class PrintEnv{
                 System.exit(1);
             }
 
-            System.out.println("Stop me by executing 'helm uninstall javaapp'");
-            Thread.sleep(10 * 1000);
+            return "Hello, user " + newUser;
         }
     }
 }
