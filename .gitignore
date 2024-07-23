@@ -3,3 +3,9 @@ mesh.yaml
 mesh_out.yaml
 service.yaml
 target/
+
+# Ignore Gradle project-specific cache directory
+.gradle
+
+# Ignore Gradle build output directory
+build

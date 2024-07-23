@@ -1,11 +1,20 @@
+package java_sconectl_tutorial;
+
+
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController("/")
 public class PrintEnv{
-    public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
+    
+    @GetMapping
+    public void printEnv() throws NoSuchAlgorithmException, UnsupportedEncodingException, InterruptedException{
         String user = System.getenv("API_USER");
         String pw = System.getenv("API_PASSWORD");
 
