@@ -72,7 +72,7 @@ usage ()
   echo "                    export APP_IMAGE_REPO=\"$APP_IMAGE_REPO\""
   echo "    $verbose_flag"
   echo "                  Enable verbose output"
-  echo "    $debug_flag | debug_short_flag"
+  echo "    $debug_flag | $debug_short_flag"
   echo "                  Create debug image instead of a production image"
   echo "    $cas_flag"
   echo "                  Set the name of the CAS service that we should use. Default is $CAS"
@@ -225,6 +225,10 @@ echo -e "${BLUE} - this requires that 'kubectl' gives access to a Kubernetes clu
 helm uninstall $namespace_arg ${release} 2> /dev/null || true
 
 echo -e "${BLUE}install application:${NC} helm install ${namespace_args} ${RELEASE} target/helm/"
+
+sudo chown -R $USER ./target/
+#TODO: remove me
+sed -i 's#las.scontain.com/ok: true#las.scontain.com/ok: "true"#'  target/helm/charts/javaapp/values.yaml
 
 helm install $namespace_arg ${release} target/helm/
 

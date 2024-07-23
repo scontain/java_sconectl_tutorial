@@ -35,17 +35,12 @@ build:
   kind: java17  # java17-bullseye
   to: $APP_IMAGE_REPO/java_hello_user:1
   pwd: /java
-  command: java PrintEnv
+  command: java -jar /app/build/libs/app-0.0.1-SNAPSHOT.jar
   copy:
-    - PrintEnv.java
+    - /app/build/libs/app-0.0.1-SNAPSHOT.jar
   host_path:
     - /etc/ssl/certs  # danger zone: permit access to all CA certificates
+    - /tmp
   signature:
     sign: true
-  run:
-    - > 
-     echo "You can also RUN additional commands in the same way as docker build RUN commands"
-     && echo "If you use multi-line commands, please do not forget to start lines with &&."
-     && echo "A multi-line command like this will be added as a single line. No need for \\"
-    - echo "Or use single line command"
-    - echo "Each command is executed by a single RUN command"
+
