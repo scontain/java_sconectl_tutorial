@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -e
-export VERSION=${VERSION:-5.8.0}
+export VERSION=${VERSION:-5.8.1}
 export CAS_VERSION=${CAS_VERSION:-$VERSION}
 
 
