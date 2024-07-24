@@ -226,6 +226,10 @@ helm uninstall $namespace_arg ${release} 2> /dev/null || true
 
 echo -e "${BLUE}install application:${NC} helm install ${namespace_args} ${RELEASE} target/helm/"
 
+sudo chown -R $USER ./target/
+#TODO: remove me
+sed -i 's#las.scontain.com/ok: true#las.scontain.com/ok: "true"#'  target/helm/charts/javaapp/values.yaml
+
 helm install $namespace_arg ${release} target/helm/
 
 echo -e "${BLUE}Check the logs by executing:${NC} kubectl logs ${namespace_args} ${RELEASE}<TAB>"
