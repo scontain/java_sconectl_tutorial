@@ -18,7 +18,7 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 trap 'if [ $? -ne 0 ]; then echo "${RED}\"${last_command}\" command failed - exiting.${NC}"; fi' EXIT
 
 function error_exit() {
-  trap 'echo -e  "${RED}Exiting with error.${NC}"' EXIT
+  trap 'echo -e  "${RED}Fatal error - exiting.${NC}"' EXIT
   exit 1
 }
 
@@ -45,6 +45,15 @@ then
 fi
 
 
+echo -e "${BLUE}Checking if 'kubectl provision' is installed.${NC}"
+if ! kubectl provision --help  &> /dev/null
+then
+       echo -e "${RED} kubectl provision not installed! Please install"
+       echo -e " - see 'https://sconedocs.github.io/2_operator_installation/#tldr'${NC}"
+       echo -e "   use command 'operator_controller --only-plugin --verbose'"
+       error_exit
+fi
+
 echo -e "${BLUE}Checking that we have access to docker${NC}"
 if ! command -v docker &> /dev/null
 then
@@ -53,7 +62,7 @@ then
 fi
 
 echo -e "${BLUE}Checking that we run applications with docker without sudo${NC}"
-if ! docker run  --network=host --platform linux/amd64 --rm hello-world &> /dev/null
+if ! docker run --platform linux/amd64 --rm hello-world &> /dev/null
 then
     echo -e "${RED}Docker does not seem to run."
     echo -e "Please ensure that you can run docker without sudo: https://docs.docker.com/engine/install/linux-postinstall/." 
@@ -62,7 +71,7 @@ then
 fi
 
 echo -e "${BLUE}Checking that we can run container images for linux/amd64${NC}"
-if ! docker run --network=host --platform linux/amd64 --rm hello-world &> /dev/null
+if ! docker run --platform linux/amd64 --rm hello-world &> /dev/null
 then
     echo -e "${RED}Docker does not seem to support argument '--platform linux/amd64'"
     echo -e "Please ensure that you can run the latest version of docker (i.e.,  API version >= 1.40)" 
@@ -88,7 +97,7 @@ then
 fi
 
 echo -e "${BLUE}Checking that we the CPU has all necessary CPU features enabled${NC}"
-if ! docker run  --network=host --platform linux/amd64 -e SCONE_PRODUCTION=0 -e SCONE_NO_TIME_THREAD=1 --rm $SCONECTL_REPO/check_cpufeatures:${VERSION} &> /dev/null
+if ! docker run --platform linux/amd64 -e SCONE_PRODUCTION=0 -e SCONE_NO_TIME_THREAD=1 --rm $SCONECTL_REPO/check_cpufeatures:${VERSION} &> /dev/null
 then
     echo -e "${RED}Docker does not seem to support all CPU features.${NC}"
     echo -e "- ${ORANGE}Assuming you do not run on a modern Intel CPU. Please ensure that you pass the following options to qemu: -cpu qemu64,+ssse3,+sse3,+sse4.1,+sse4.2,+rdrand,+popcnt,+xsave,+aes${NC}" 
@@ -144,6 +153,9 @@ echo -e "${BLUE}Checking that you have the local attestation service, the SGX Pl
 if ! ((kubectl get las | grep HEALTHY) && (kubectl get sgxplugin | grep HEALTHY))
 then
     echo -e "${RED}It seems the Kubernetes cluster is not yet properly initialized!${NC}"
+    echo -e "- ${ORANGE}0. Check that las and sgxplugin are healthy:${NC}"
+    echo -e "- ${ORANGE}     - kubectl get sgxplugin${NC}"
+    echo -e "- ${ORANGE}     - kubectl get las${NC}"
     echo -e "- ${ORANGE}1. Retrieve/create an access token https://sconedocs.github.io/registry/#create-an-access-token${NC}"
     echo -e "- ${ORANGE}2. Install the SCONE operator: https://sconedocs.github.io/2_operator_installation/"
     echo -e "- ${ORANGE}3. Install SGXPlugin, LAS, and CAS: https://sconedocs.github.io/4_quickstart/${NC}"

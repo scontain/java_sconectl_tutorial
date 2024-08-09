@@ -29,7 +29,8 @@ ns_short_flag="-n"
 repo_flag="--image_repo"
 repo_short_flag="-i"
 verbose_flag="-v"
-verbose=""
+#verbose=""
+verbose="-vvvvvvvv"
 release_flag="--release"
 release_short_flag="-r"
 verbose=""
@@ -184,7 +185,7 @@ if [  "${RELEASE}" == "" ]; then
 fi
 
 # Check to make sure all prerequisites are installed
-#  ./check_prerequisites.sh
+./check_prerequisites.sh
 
 echo -e "${BLUE}Checking that we have access to the base container image${NC}"
 

@@ -37,7 +37,7 @@ resources:
     "sgx.k8s.io/sgx": 1
 
 nodeSelector:
-  las.scontain.com/ok: true
+  las.scontain.com/ok: "true"
 
 tolerations: []
 
@@ -45,7 +45,7 @@ affinity: {}
 
 
 scone:
-  api_session: {{session}}/{{command}}
+  api_session: {{session}}/{{cas_service_name}}
   cas: {{cas.cas.cas_url}}
   command: ["{{command}}"]
 
