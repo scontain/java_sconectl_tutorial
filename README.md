@@ -3,20 +3,14 @@
 ## TL'DR
 
 ```bash
-# In case you want to test a release candidate of `sconectl`, you can change the repo and the VERSION
-export SCONECTL_REPO=registry.scontain.com/cicd # default is registry.scontain.com/sconectl
-export VERSION=5.8.0  # default version is "latest".
-export CAS="cas" # set the name of the CAS instance that we should used; default is "cas"
-export CAS_NAMESPACE="scone-system" # set the Kubernetes namespace of the CAS instance that we should used; default is "default"
-# if you want to use the latest stable release, ensure that these variables are not set:
-unset SCONECTL_REPO
-unset VERSION
+# configure the demo
+cp .conf.template .conf
+vi .conf
+set -a; source .conf; set +a;
 # cleanup the last state
 rm -rf release.sh target
-# define REPO to which you are # define REPO to which you are permitted to push container images
-REPO="<YOUR-REPO>"
 # execute all steps of this tutorial
-./run.sh -i "$REPO" --release java-app -v
+./run.sh -i "$REPO" --release javaapp -v
 ```
 
 ## Motivation
@@ -31,6 +25,17 @@ Currently, we offer support for the Java versions ([open JDK](https://openjdk.or
 - Java 17: kind `java` 
 - Java 15: kind `java15`
 - Java 8: kind `java8`
+
+## Kubernetes Cluster
+
+We assume that you have access to a Kubernetes cluster, to which you want to deploy this demo application.
+On your Kubernetes cluster, the SCONE SGX Plugin service and the SCONE LAS service needs to be installed.
+The easiest way to deploy these is to use the SCONE Operator.
+
+Alternatively, you if you have at your disposal a machine with Intel SGX support but no Kubernetes cluster configured, you can start up a containerized cluster by running the script `start-cluster.sh` (and the counterpart `stop-cluster.sh`).
+Make sure you have [k3d](https://k3d.io/v5.7.4/#releases) installed beforehand.
+The script `start-cluster.sh` sets up a new cluster and configure the SCONE SGX Plugin and the SCONE LAS services for you.
+Then you can proceed executing `run.sh`.
 
 ## Declaring an Application
 
