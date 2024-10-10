@@ -3,3 +3,4 @@ mesh.yaml
 mesh_out.yaml
 service.yaml
 target/
+.conf
