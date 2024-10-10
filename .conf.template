@@ -23,6 +23,6 @@ REPO=<YOUR-REPO>
 
 # Uncomment the variable below if you want to set up a containerized cluster to run the demo
 # You must run `start-cluster.rs` before running your application
-DEMO_CONTAINERIZED_CLUSTER_NAME=demo-cluster
+# DEMO_CONTAINERIZED_CLUSTER_NAME=demo-cluster
 # Your personal Intel PCS API key
-DEMO_DCAP_API=<YOUR-API-KEY>
+# DEMO_DCAP_API=<YOUR-API-KEY>
