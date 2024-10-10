@@ -8,6 +8,12 @@ echo "| -----------   SETUP CLUSTER    ----------- |"
 echo "└────────────────────────────────────────────┘"
 echo ""
 
+# we trigger the setup from a temp dir because the SCONE Operator Controller Script
+# creates a bunch of files when installing the SCONE Operator
+workdir="$(mktemp -d)"
+echo "Working directory set to $workdir"
+pushd "$workdir" >/dev/null
+
 echo "Creating cluster $DEMO_CONTAINERIZED_CLUSTER_NAME"
 k3d cluster create "$DEMO_CONTAINERIZED_CLUSTER_NAME" --servers 1 --agents 2
 # by default k3d adds a prefix to the context, we remove it
@@ -31,3 +37,6 @@ echo "Deploy CAS in cluster '$DEMO_CONTAINERIZED_CLUSTER_NAME'..."
 # the SCONE Operator installs the kubectl plugin `provision`, which we use to deploy CAS
 kubectl provision cas "$CAS" --namespace "$CAS_NAMESPACE" --dcap-api "$DEMO_DCAP_API"
 echo "Ok"
+
+popd >/dev/null
+rm -rf "$workdir"
