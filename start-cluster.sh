@@ -15,7 +15,7 @@ echo "Working directory set to $workdir"
 pushd "$workdir" >/dev/null
 
 echo "Creating cluster $DEMO_CONTAINERIZED_CLUSTER_NAME"
-k3d cluster create "$DEMO_CONTAINERIZED_CLUSTER_NAME" --servers 1 --agents 2 --api-por 172.17.0.1:6550 
+k3d cluster create "$DEMO_CONTAINERIZED_CLUSTER_NAME" --servers 1 --agents 2 --api-port 172.17.0.1:6550 
 # by default k3d adds a prefix to the context, we remove it
 kubectl config rename-context "k3d-$DEMO_CONTAINERIZED_CLUSTER_NAME" "$DEMO_CONTAINERIZED_CLUSTER_NAME"
 echo "Ok"
