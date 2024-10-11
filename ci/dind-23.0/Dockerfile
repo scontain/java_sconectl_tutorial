@@ -3,7 +3,10 @@ FROM docker:23.0-dind
 # Install utilities
 RUN apk add --no-cache grep py3-pip bash coreutils jq curl gettext ruby git tar zstd binutils xz && \
     apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing && \
-    gem install fpm
+    gem install fpm && \
+    curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64" && \
+    mv cosign-linux-amd64 /usr/local/bin/cosign && \
+    chmod +x /usr/local/bin/cosign
 
 # Install k3d, kubectl, and helm
 ARG KUBECTL_VERSION="v1.28.10"
