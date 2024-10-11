@@ -32,7 +32,7 @@ jobs:
     container:
       credentials:
         username: ${{ secrets.REGISTRY_USERNAME }}
-        password: ${{ secrets.REGISTRY_TOKEN }}
+        password: ${{ secrets.REGISTRY_ACCESS_TOKEN }}
       image: registry.scontain.com/cicd/tabajara/ci-docker-demo:23.0-dind-r1
       volumes:
         - /var/run/docker.sock:/var/run/docker.sock
