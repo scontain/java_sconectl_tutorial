@@ -23,8 +23,10 @@ env:
   DEMO_DCAP_API: ${{ secrets.DCAP_API }}
   DEMO_CONTAINERIZED_CLUSTER_NAME: demo-cluster
   REPO: registry.scontain.com/cicd/tabajara
+  CAS: cas
   CAS_NAMESPACE: scone-system
   VERSION: latest # test with the latest version in CI
+  SCONECTL_REPO: registry.scontain.com/cicd
 
 jobs:
   run-java-demo:
