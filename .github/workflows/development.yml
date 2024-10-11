@@ -43,7 +43,8 @@ jobs:
         shell: bash
       - run: ./run.sh -i $REPO --release javaapp -v
         shell: bash
-      - run: ./stop-cluster.sh
+      - if: always() # make sure we always delete the clusters we create
+        run: ./stop-cluster.sh
         shell: bash
       - if: always()
         uses: ./.github/actions/clean-up-docker
