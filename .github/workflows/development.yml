@@ -24,6 +24,7 @@ env:
   DEMO_CONTAINERIZED_CLUSTER_NAME: demo-cluster
   REPO: registry.scontain.com/cicd/tabajara
   CAS_NAMESPACE: scone-system
+  VERSION: latest # test with the latest version in CI
 
 jobs:
   run-java-demo:
