@@ -1,0 +1,12 @@
+name: "Clean Up Docker"
+description: "Cleans docker data"
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        docker ps --quiet | xargs -r docker kill
+        docker container prune --force
+        docker volume prune --force
+        docker network prune --force
+        docker image prune --force
+      shell: bash
