@@ -38,7 +38,7 @@ build:
   command: java PrintEnv
   copy:
     - PrintEnv.java
-  host_path:
+  host_paths:
     - /etc/ssl/certs  # danger zone: permit access to all CA certificates
   signature:
     sign: true
