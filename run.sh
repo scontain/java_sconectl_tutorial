@@ -198,6 +198,14 @@ docker inspect ${SCONECTL_REPO}/sconecli:${VERSION} > /dev/null 2> /dev/null || 
 echo -e "${BLUE}let's ensure that we build everything from scratch${NC}" 
 rm -rf target || echo -e "${ORANGE} Failed to delete target directory - ignoring this! ${NC}"
 
+echo -e "${BLUE}Configure the registry '$DEMO_REGISTRY' from where to pull/push the app image${NC}"
+kubectl delete secret docker-registry sconeapps --namespace default --ignore-not-found
+kubectl create secret docker-registry sconeapps \
+    --namespace default \
+    --docker-server="$DEMO_REGISTRY" \
+    --docker-username="$DEMO_REGISTRY_USERNAME" \
+    --docker-password="$DEMO_REGISTRY_ACCESS_TOKEN" \
+    --docker-email="$DEMO_REGISTRY_EMAIL"
 
 echo -e  "${BLUE}build service image:${NC} apply -f service.yaml"
 echo -e  "${BLUE} - if the push fails, add --no-push to avoid pushing the image, or${NC}"

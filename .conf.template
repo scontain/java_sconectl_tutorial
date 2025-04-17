@@ -1,0 +1,28 @@
+# to use the latest stable release, comment out the two lines below
+VERSION=5.8.0 # default version is "latest"
+SCONECTL_REPO="registry.scontain.com/cicd" # default is registry.scontain.com/sconectl
+
+# set the name of the CAS instance that we should used; default is "cas"
+CAS="cas"
+# set the Kubernetes namespace of the CAS instance that we should used; default is "default"
+CAS_NAMESPACE="scone-system"
+
+# Registry where to pull the SCONE Apps, e.g., CAS
+SCONE_REGISTRY_USERNAME=<YOUR-SCONTAIN-REGISTRY-USERNAME>
+SCONE_REGISTRY_EMAIL=<YOUR-EMAIL-THAT-YOU-REGISTERED-AT-SCONTAIN-REGISTRY>
+SCONE_REGISTRY_ACCESS_TOKEN=<YOUR-SCONTAIN-REGISTRY-TOKEN>
+
+# Registry where to push the generated app image
+DEMO_REGISTRY=<YOUR-REGISTRY-DOMAIN>
+DEMO_REGISTRY_USERNAME=<YOUR-REGISTRY-USERNAME>
+DEMO_REGISTRY_EMAIL=<YOUR-REGISTRY-EMAIL>
+DEMO_REGISTRY_ACCESS_TOKEN=<YOUR-REGISTRY-TOKEN>
+
+# where to pull and push the app image
+REPO=<YOUR-REPO>
+
+# Uncomment the variable below if you want to set up a containerized cluster to run the demo
+# You must run `start-cluster.rs` before running your application
+# DEMO_CONTAINERIZED_CLUSTER_NAME=demo-cluster
+# Your personal Intel PCS API key
+# DEMO_DCAP_API=<YOUR-API-KEY>
