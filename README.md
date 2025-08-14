@@ -4,8 +4,8 @@
 
 ```bash
 # In case you want to test a release candidate of `sconectl`, you can change the repo and the VERSION
-export SCONECTL_REPO=registry.scontain.com/cicd # default is registry.scontain.com/sconectl
-export VERSION=5.8.0  # default version is "latest".
+export SCONECTL_REPO=registry.scontain.com/sconectl # default is registry.scontain.com/sconectl
+export VERSION=6.0.0  # default version is "latest".
 export CAS="cas" # set the name of the CAS instance that we should used; default is "cas"
 export CAS_NAMESPACE="scone-system" # set the Kubernetes namespace of the CAS instance that we should used; default is "default"
 # if you want to use the latest stable release, ensure that these variables are not set:
@@ -28,9 +28,26 @@ The code of this tutorial can be found [on github](https://github.com/scontain/j
 ## Java Support
 
 Currently, we offer support for the Java versions ([open JDK](https://openjdk.org/)) listed below. To select a Java version, please specify it using the field `build.kind` in the `service.yaml.template` file.  
-- Java 17: kind `java` 
-- Java 15: kind `java15`
-- Java 8: kind `java8`
+- Java 21 on Alpine: kind `java21`
+- Java 21 on Ubuntu: kind `java21-ubuntu`
+- Java 17 on Alpine: kind `java`
+- Java 17 on Bookworm: kind `java-glibc`
+- Java 15 on Alpine: kind `java15`
+- Java 8 on Alpine: kind `java8`
+
+## Selecting Java Version
+
+By default, `run.sh` uses `java21`. You can select any of the following Java versions:
+
+```bash
+JAVA_VERSIONS="java8 java15 java17 java17-glibc java21 java21-ubuntu"
+```
+
+and define `JAVA_VERSION` before executing `run.sh` to run this tutorial with the given version of Java:
+
+```
+export JAVA_VERSION=java21-ubuntu
+```
 
 ## Declaring an Application
 

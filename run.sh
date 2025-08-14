@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 
 set -e
-export VERSION=${VERSION:-5.8.0}
+export VERSION=${VERSION:-6.0.0}
 export CAS_VERSION=${CAS_VERSION:-$VERSION}
-
+export JAVA_VERSION=${JAVA_VERSION:-java21}
 
 export RED='\e[31m'
 export BLUE='\e[34m'

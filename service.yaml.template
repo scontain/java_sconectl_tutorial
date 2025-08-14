@@ -32,7 +32,7 @@ secrets:
       feedfeed00
 build:
   name: java-hello-user
-  kind: java17  # java17-bullseye
+  kind: $JAVA_VERSION  # e.g., java17
   to: $APP_IMAGE_REPO/java_hello_user:1
   pwd: /java
   command: java PrintEnv
