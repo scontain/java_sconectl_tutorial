@@ -50,6 +50,32 @@ error_exit() {
   exit 1
 }
 
+check_commands() {
+    local cmds=(apply gen-policy mesh scone_genservice scone_verify sconify_image scone_apply scone_mesh verify genservice sign-policy)
+    local missing=false
+    local red='\033[0;31m'
+    local green='\033[0;32m'
+    local yellow='\033[1;33m'
+    local reset='\033[0m'
+
+    for cmd in "${cmds[@]}"; do
+        if command -v "$cmd" >/dev/null 2>&1; then
+            echo -e "${green}✔ Found:${reset} $cmd"
+        else
+            echo -e "${red}✘ Missing:${reset} $cmd"
+            missing=true
+        fi
+    done
+
+    if $missing; then
+        echo -e "${yellow}→ Setting SCONECTLCMD='sconectl'${reset}"
+        export SCONECTLCMD="sconectl"
+    else
+        echo -e "${green}→ All good, SCONECTLCMD=''${reset}"
+        export SCONECTLCMD=""
+    fi
+}
+
 usage ()
 {
   echo ""
@@ -184,16 +210,23 @@ if [  "${RELEASE}" == "" ]; then
     error_exit  "Error: You must specify a release using ${release_flag}."
 fi
 
-# Check to make sure all prerequisites are installed
-./check_prerequisites.sh
+check_commands
 
-echo -e "${BLUE}Checking that we have access to the base container image${NC}"
+if [ -z "$SCONECTLCMD" ] ; then
+    echo -e "${BLUE}Using sconectl commands directly${NC}"
+else
+    echo -e "${BLUE}Using sconectl commands via 'sconectl' prefix${NC}"
 
-docker inspect ${SCONECTL_REPO}/sconecli:${VERSION} > /dev/null 2> /dev/null || docker pull ${SCONECTL_REPO}/sconecli:${VERSION} > /dev/null 2> /dev/null || { 
-    echo -e "${RED}You must get access to image `${SCONECTL_REPO}/sconecli:${VERSION}`.${NC}" 
-    error_exit "Please send email info@scontain.com to ask for access"
-}
+    # Check to make sure all prerequisites are installed
+    ./check_prerequisites.sh
 
+    echo -e "${BLUE}Checking that we have access to the base container image${NC}"
+
+    docker inspect ${SCONECTL_REPO}/sconecli:${VERSION} > /dev/null 2> /dev/null || docker pull ${SCONECTL_REPO}/sconecli:${VERSION} > /dev/null 2> /dev/null || { 
+        echo -e "${RED}You must get access to image `${SCONECTL_REPO}/sconecli:${VERSION}`.${NC}" 
+        error_exit "Please send email info@scontain.com to ask for access"
+    }
+fi
 
 echo -e "${BLUE}let's ensure that we build everything from scratch${NC}" 
 rm -rf target || echo -e "${ORANGE} Failed to delete target directory - ignoring this! ${NC}"
@@ -205,11 +238,11 @@ echo -e  "${BLUE}   change in file '${ORANGE}service.yaml${BLUE}' field '${ORANG
 
 SCONE="\$SCONE" envsubst < service.yaml.template > service.yaml
 
-sconectl apply -f service.yaml --helm-template templates-genservice $verbose $debug --set-version ${VERSION}
+$SCONECTLCMD apply -f service.yaml --helm-template templates-genservice $verbose $debug --set-version ${VERSION}
 
 echo -e "${BLUE}Determine the keys of CAS instance '$CAS' in namespace '$CAS_NAMESPACE'"
 
-source <(VERSION="$CAS_VERSION" kubectl provision cas "$CAS" -n "$CAS_NAMESPACE" --print-public-keys || exit 1)
+source <(VERSION="$CAS_VERSION" kubectl provision cas "$CAS" -n "$CAS_NAMESPACE" --print-public-keys --no-image-signature-check || exit 1)
 
 echo -e "${BLUE}build application and pushing policies:${NC} apply -f mesh.yaml"
 echo -e "${BLUE}  - this fails, if you do not have access to the SCONE CAS namespace"
@@ -218,7 +251,7 @@ echo -e "  - update the namespace '${ORANGE}policy.namespace${NC}' to a unique n
 export CAS_URL="${CAS}.${CAS_NAMESPACE}"
 SCONE="\$SCONE" envsubst < mesh.yaml.template > mesh.yaml
 
-sconectl apply -f mesh.yaml --release "$RELEASE" $verbose $debug --set-version ${VERSION}
+$SCONECTLCMD apply -f mesh.yaml --release "$RELEASE" $verbose $debug --set-version ${VERSION}
 
 echo -e "${BLUE}Uninstalling application in case it was previously installed:${NC} helm uninstall ${namespace_args} ${RELEASE}"
 echo -e "${BLUE} - this requires that 'kubectl' gives access to a Kubernetes cluster${NC}"
