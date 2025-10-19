@@ -13,7 +13,7 @@ export NC='\e[0m' # No Color
 APP_NAMESPACE=""
 source release.sh 2> /dev/null || true # get release name
 
-DEFAULT_NAMESPACE="default" # Default Kubernetes namespace to use
+DEFAULT_NAMESPACE=$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace) || DEFAULT_NAMESPACE="default" # Default Kubernetes namespace to use
 export APP_IMAGE_REPO=${APP_IMAGE_REPO:=""} # Must be defined!
 export SCONECTL_REPO=${SCONECTL_REPO:="registry.scontain.com/sconectl"}
 export CAS=${CAS:="cas"}
@@ -40,7 +40,7 @@ debug=""
 cas_flag="--cas"
 cas_namespace_flag="--cas-namespace"
 
-ns="$DEFAULT_NAMESPACE"
+export ns="$DEFAULT_NAMESPACE"
 repo="$APP_IMAGE_REPO"
 release="$RELEASE"
 
@@ -122,7 +122,7 @@ usage ()
 while [[ "$#" -gt 0 ]]; do
   case $1 in
     ${ns_flag} | ${ns_short_flag})
-      ns="$2"
+      export ns="$2"
       if [ ! -n "${ns}" ]; then
         usage
         error_exit "Error: The namespace '$ns' is invalid."

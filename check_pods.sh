@@ -12,7 +12,7 @@ if [[ "$RELEASE" == "" ]]; then
 fi
 
 export POD=$(kubectl get pods --namespace $NAMESPACE -l "app.kubernetes.io/name=$APP_NAME,app.kubernetes.io/instance=$RELEASE" -o jsonpath="{.items[0].metadata.name}")
-export READY=$(kubectl get pod $POD -o jsonpath='{.status.containerStatuses[0].ready}')
+export READY=$(kubectl get pod --namespace $NAMESPACE $POD -o jsonpath='{.status.containerStatuses[0].ready}')
 
 echo "Checking pod $POD of"
 echo "  RELEASE=$RELEASE APP_NAME=$APP_NAME, NAMESPACE=$NAMESPACE"
